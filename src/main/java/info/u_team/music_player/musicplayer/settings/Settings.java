@@ -16,6 +16,8 @@ public class Settings {
 	private IngameOverlayPosition ingameOverlayPosition;
 	
 	private boolean keyWorkInGui;
+
+	private boolean multiplayerMode;
 	
 	public Settings() {
 		volume = 10;
@@ -25,6 +27,7 @@ public class Settings {
 		showIngameMenueOverlay = false;
 		ingameOverlayPosition = IngameOverlayPosition.DOWN_RIGHT;
 		keyWorkInGui = true;
+		multiplayerMode = false;
 	}
 	
 	public int getVolume() {
@@ -89,13 +92,22 @@ public class Settings {
 		this.keyWorkInGui = keyWorkInGui;
 		save();
 	}
+
+	public boolean isMultiplayerMode() {
+		return multiplayerMode;
+	}
+
+	public void setMultiplayerMode(boolean multiplayerMode) {
+		this.multiplayerMode = multiplayerMode;
+		save();
+	}
 	
 	public boolean isFinite() {
 		return repeat == Repeat.NO;
 	}
 	
 	public boolean isSingleRepeat() {
-		return repeat == Repeat.SINGLE;
+		return /* !multiplayerMode && */ repeat == Repeat.SINGLE;
 	}
 	
 	private void save() {

@@ -1,26 +1,31 @@
 package info.u_team.music_player.gui.playlist.search;
 
-import static info.u_team.music_player.init.MusicPlayerLocalization.GUI_SEARCH_ADDED;
-import static info.u_team.music_player.init.MusicPlayerLocalization.getTranslation;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import info.u_team.music_player.gui.util.GuiTrackUtils;
 import info.u_team.music_player.lavaplayer.api.audio.IAudioTrack;
+import info.u_team.music_player.musicplayer.MusicPlayerManager;
 import info.u_team.music_player.musicplayer.playlist.Playlist;
 import net.minecraft.ChatFormatting;
+
+import static info.u_team.music_player.init.MusicPlayerLocalization.*;
 
 public class GuiMusicSearchListEntryMusicTrack extends GuiMusicSearchListEntry {
 	
 	private final IAudioTrack track;
 	private final boolean playlistEntry;
 	
-	public GuiMusicSearchListEntryMusicTrack(GuiMusicSearch gui, Playlist playlist, IAudioTrack track, boolean playlistEntry) {
+	public GuiMusicSearchListEntryMusicTrack(IGuiMusicSearch gui, Playlist playlist, IAudioTrack track, boolean playlistEntry) {
 		this.track = track;
 		this.playlistEntry = playlistEntry;
 		addTrackButton.setPressable(() -> {
-			playlist.add(track);
-			gui.setInformation(ChatFormatting.GREEN + getTranslation(GUI_SEARCH_ADDED), 150);
+			if (MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode()){
+				minecraft.keyboardHandler.setClipboard(track.getInfo().getURI());
+				gui.setInformation(ChatFormatting.GREEN + getTranslation(GUI_MULTIPLAYER_CLIPBOARD) + track.getInfo().getURI(), 150);
+			} else {
+				playlist.add(track);
+				gui.setInformation(ChatFormatting.GREEN + getTranslation(GUI_SEARCH_ADDED), 150);
+			}
 		});
 	}
 	

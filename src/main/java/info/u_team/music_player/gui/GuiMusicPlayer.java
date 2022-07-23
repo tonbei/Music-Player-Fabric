@@ -1,9 +1,13 @@
 package info.u_team.music_player.gui;
 
-import static info.u_team.music_player.init.MusicPlayerLocalization.GUI_CREATE_PLAYLIST_ADD_LIST;
-import static info.u_team.music_player.init.MusicPlayerLocalization.GUI_CREATE_PLAYLIST_INSERT_NAME;
-import static info.u_team.music_player.init.MusicPlayerLocalization.getTranslation;
-
+import info.u_team.music_player.gui.settings.GuiMusicPlayerSettings;
+import info.u_team.music_player.init.MusicPlayerColors;
+import info.u_team.music_player.init.MusicPlayerNetworkHandler;
+import info.u_team.music_player.musicplayer.MusicPlayerManager;
+import info.u_team.music_player.musicplayer.settings.Repeat;
+import info.u_team.music_player.musicplayer.settings.Settings;
+import info.u_team.u_team_core.gui.elements.ScalableActivatableButton;
+import net.minecraft.client.gui.screens.PauseScreen;
 import org.apache.commons.lang3.StringUtils;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -16,6 +20,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+
+import static info.u_team.music_player.init.MusicPlayerLocalization.*;
 
 public class GuiMusicPlayer extends BetterScreen {
 	
@@ -32,7 +38,20 @@ public class GuiMusicPlayer extends BetterScreen {
 	@Override
 	protected void init() {
 		addRenderableWidget(new ImageButton(1, 1, 15, 15, MusicPlayerResources.TEXTURE_BACK, button -> minecraft.setScreen(null)));
-		
+
+		final boolean isSettings = minecraft.screen instanceof GuiMusicPlayerSettings;
+		final Settings settings = MusicPlayerManager.getSettingsManager().getSettings();
+		final int modeY = width - (70 + (!isSettings ? 15 + 2 : 1));
+		final ScalableActivatableButton multiplayerModeInGuiButton = addRenderableWidget(new ScalableActivatableButton(modeY, isSettings ? 1 : 18, 70, 15, Component.nullToEmpty(getTranslation(GUI_MULTIPLAYER_MODE)), 0.7F, settings.isMultiplayerMode(), MusicPlayerColors.LIGHT_GREEN));
+		multiplayerModeInGuiButton.setPressable(() -> {
+			settings.setMultiplayerMode(!settings.isMultiplayerMode());
+			multiplayerModeInGuiButton.setActivated(settings.isMultiplayerMode());
+			settings.setShowIngameMenueOverlay(false);
+			settings.setRepeat(Repeat.NO);
+			MusicPlayerNetworkHandler.stopTrackInPlaylists();
+			minecraft.setScreen(new GuiMusicPlayerMulti());
+		});
+
 		namePlaylistField = new EditBox(font, 100, 60, width - 150, 20, Component.nullToEmpty(null));
 		namePlaylistField.setMaxLength(500);
 		addWidget(namePlaylistField);

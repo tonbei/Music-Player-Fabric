@@ -5,7 +5,7 @@ import info.u_team.music_player.dependency.DependencyManager;
 import info.u_team.music_player.musicplayer.MusicPlayerManager;
 
 public class MusicPlayerClientConstruct {
-	
+
 	public static void construct() {
 		System.setProperty("http.agent", "Chrome");
 		
@@ -19,6 +19,8 @@ public class MusicPlayerClientConstruct {
 		MusicPlayerKeys.register();
 		
 		MusicPlayerEventHandler.register();
+
+		MusicPlayerNetworkHandler.register();
 	}
 	
 }

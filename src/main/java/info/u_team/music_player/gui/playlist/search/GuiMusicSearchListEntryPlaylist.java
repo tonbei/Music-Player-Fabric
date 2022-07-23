@@ -1,9 +1,5 @@
 package info.u_team.music_player.gui.playlist.search;
 
-import static info.u_team.music_player.init.MusicPlayerLocalization.GUI_SEARCH_ADDED_LIST;
-import static info.u_team.music_player.init.MusicPlayerLocalization.GUI_TRACK_DURATION_UNDEFINED;
-import static info.u_team.music_player.init.MusicPlayerLocalization.getTranslation;
-
 import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -11,9 +7,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import info.u_team.music_player.gui.util.GuiTrackUtils;
 import info.u_team.music_player.lavaplayer.api.audio.IAudioTrack;
 import info.u_team.music_player.lavaplayer.api.audio.IAudioTrackList;
+import info.u_team.music_player.musicplayer.MusicPlayerManager;
 import info.u_team.music_player.musicplayer.playlist.Playlist;
 import info.u_team.music_player.util.TimeUtil;
 import net.minecraft.ChatFormatting;
+
+import static info.u_team.music_player.init.MusicPlayerLocalization.*;
 
 public class GuiMusicSearchListEntryPlaylist extends GuiMusicSearchListEntry {
 	
@@ -22,7 +21,7 @@ public class GuiMusicSearchListEntryPlaylist extends GuiMusicSearchListEntry {
 	private final String name;
 	private final String duration;
 	
-	public GuiMusicSearchListEntryPlaylist(GuiMusicSearch gui, Playlist playlist, IAudioTrackList trackList) {
+	public GuiMusicSearchListEntryPlaylist(IGuiMusicSearch gui, Playlist playlist, IAudioTrackList trackList) {
 		this.trackList = trackList;
 		name = trackList.getName();
 		
@@ -35,8 +34,13 @@ public class GuiMusicSearchListEntryPlaylist extends GuiMusicSearchListEntry {
 		}
 		
 		addTrackButton.setPressable(() -> {
-			playlist.add(trackList);
-			gui.setInformation(ChatFormatting.GREEN + getTranslation(GUI_SEARCH_ADDED_LIST), 150);
+			if (MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode()) {
+				minecraft.keyboardHandler.setClipboard(trackList.getUri());
+				gui.setInformation(ChatFormatting.GREEN + getTranslation(GUI_MULTIPLAYER_CLIPBOARD) + trackList.getUri(), 150);
+			} else {
+				playlist.add(trackList);
+				gui.setInformation(ChatFormatting.GREEN + getTranslation(GUI_SEARCH_ADDED_LIST), 150);
+			}
 		});
 	}
 	

@@ -31,5 +31,7 @@
 	"key.musicplayer.open": "Open Music Player",
 	"key.musicplayer.pause": "Pause Music Player",
 	"key.musicplayer.skip.back": "Skip Back",
-	"key.musicplayer.skip.forward": "Skip Forward"
+	"key.musicplayer.skip.forward": "Skip Forward",
+	"gui.multiplayer.mode": "Multiplayer Mode",
+	"gui.multiplayer.clipboard": "Copied to clipboard : "
 }

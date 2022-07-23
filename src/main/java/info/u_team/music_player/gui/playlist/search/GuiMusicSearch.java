@@ -39,7 +39,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
-public class GuiMusicSearch extends BetterScreen {
+public class GuiMusicSearch extends BetterScreen implements IGuiMusicSearch{
 	
 	private final Playlist playlist;
 	
@@ -209,7 +209,8 @@ public class GuiMusicSearch extends BetterScreen {
 		}
 		return super.mouseClicked(mouseX, mouseY, button);
 	}
-	
+
+	@Override
 	public void setInformation(String information, int maxTicksInformation) {
 		this.information = information;
 		this.maxTicksInformation = maxTicksInformation;

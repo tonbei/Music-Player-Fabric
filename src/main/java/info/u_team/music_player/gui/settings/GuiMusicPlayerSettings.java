@@ -10,6 +10,7 @@ import static info.u_team.music_player.init.MusicPlayerLocalization.getTranslati
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import info.u_team.music_player.gui.BetterScreen;
+import info.u_team.music_player.gui.GuiMusicPlayerMulti;
 import info.u_team.music_player.gui.controls.GuiControls;
 import info.u_team.music_player.init.MusicPlayerColors;
 import info.u_team.music_player.init.MusicPlayerResources;
@@ -32,7 +33,7 @@ public class GuiMusicPlayerSettings extends BetterScreen {
 	private GuiMusicPlayerSettingsMixerDeviceList mixerDeviceList;
 	
 	private GuiControls controls;
-	
+
 	public GuiMusicPlayerSettings(Screen previousGui) {
 		super(new TextComponent("musicplayersettings"));
 		this.previousGui = previousGui;
@@ -49,13 +50,16 @@ public class GuiMusicPlayerSettings extends BetterScreen {
 			settings.setKeyWorkInGui(!settings.isKeyWorkInGui());
 			toggleKeyWorkInGuiButton.setActivated(settings.isKeyWorkInGui());
 		});
-		
+
 		final ScalableActivatableButton toggleIngameMenueDisplayButton = addRenderableWidget(new ScalableActivatableButton(width / 2 + 14, 60, width / 2 - 24, 20, Component.nullToEmpty(getTranslation(GUI_SETTINGS_TOGGLE_MENUE_OVERLAY)), 1, settings.isShowIngameMenueOverlay(), MusicPlayerColors.LIGHT_GREEN));
 		toggleIngameMenueDisplayButton.setPressable(() -> {
 			settings.setShowIngameMenueOverlay(!settings.isShowIngameMenueOverlay());
 			toggleIngameMenueDisplayButton.setActivated(settings.isShowIngameMenueOverlay());
 		});
-		
+
+		if (previousGui instanceof GuiMusicPlayerMulti)
+			toggleIngameMenueDisplayButton.active = false;
+
 		final ScalableActivatableButton toggleIngameDisplayButton = addRenderableWidget(new ScalableActivatableButton(12, 90, width / 2 - 24, 20, Component.nullToEmpty(getTranslation(GUI_SETTINGS_TOGGLE_INGAME_OVERLAY)), 1, settings.isShowIngameOverlay(), MusicPlayerColors.LIGHT_GREEN));
 		toggleIngameDisplayButton.setPressable(() -> {
 			settings.setShowIngameOverlay(!settings.isShowIngameOverlay());
@@ -70,23 +74,32 @@ public class GuiMusicPlayerSettings extends BetterScreen {
 		
 		mixerDeviceList = new GuiMusicPlayerSettingsMixerDeviceList(width - 24, height, 133, 183, 12, width - 12);
 		addWidget(mixerDeviceList);
-		
-		controls = new GuiControls(this, 5, width);
-		addWidget(controls);
+
+		if (!(previousGui instanceof GuiMusicPlayerMulti)) {
+			controls = new GuiControls(this, 5, width);
+			addWidget(controls);
+		}
 	}
 	
 	@Override
 	public void tick() {
-		controls.tick();
+		if (!(previousGui instanceof GuiMusicPlayerMulti))
+			controls.tick();
 	}
 	
 	@Override
 	public void resize(Minecraft minecraft, int width, int height) {
-		final ScrollingText titleRender = controls.getTitleRender();
-		final ScrollingText authorRender = controls.getAuthorRender();
+		ScrollingText titleRender = null;
+		ScrollingText authorRender = null;
+		if (!(previousGui instanceof GuiMusicPlayerMulti)) {
+			titleRender = controls.getTitleRender();
+			authorRender = controls.getAuthorRender();
+		}
 		this.init(minecraft, width, height);
-		controls.copyTitleRendererState(titleRender);
-		controls.copyAuthorRendererState(authorRender);
+		if (!(previousGui instanceof GuiMusicPlayerMulti)) {
+			controls.copyTitleRendererState(titleRender);
+			controls.copyAuthorRendererState(authorRender);
+		}
 	}
 	
 	@Override
@@ -94,7 +107,8 @@ public class GuiMusicPlayerSettings extends BetterScreen {
 		renderDirtBackground(0);
 		mixerDeviceList.render(matrixStack, mouseX, mouseY, partialTicks);
 		font.draw(matrixStack, getTranslation(GUI_SETTINGS_MIXER_DEVICE_SELECTION), 13, 117, 0xFFFFFF);
-		controls.render(matrixStack, mouseX, mouseY, partialTicks);
+		if (!(previousGui instanceof GuiMusicPlayerMulti))
+			controls.render(matrixStack, mouseX, mouseY, partialTicks);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 	

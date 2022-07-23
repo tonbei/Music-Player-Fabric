@@ -8,6 +8,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import info.u_team.music_player.gui.GuiMusicPlayer;
+import info.u_team.music_player.gui.GuiMusicPlayerMulti;
 import info.u_team.music_player.gui.controls.GuiControls;
 import info.u_team.music_player.lavaplayer.api.queue.ITrackManager;
 import info.u_team.music_player.musicplayer.MusicPlayerManager;
@@ -47,8 +48,11 @@ public class MusicPlayerEventHandler {
 		final ITrackManager manager = MusicPlayerManager.getPlayer().getTrackManager();
 		if (isKeyDown(MusicPlayerKeys.OPEN, gui, keyCode, scanCode)) {
 			final Minecraft mc = Minecraft.getInstance();
-			if (!(mc.screen instanceof GuiMusicPlayer)) {
-				mc.setScreen(new GuiMusicPlayer());
+			if (!(mc.screen instanceof GuiMusicPlayer || mc.screen instanceof GuiMusicPlayerMulti)) {
+				if (MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode())
+					mc.setScreen(new GuiMusicPlayerMulti());
+				else
+					mc.setScreen(new GuiMusicPlayer());
 			}
 			handled = true;
 		} else if (isKeyDown(MusicPlayerKeys.PAUSE, gui, keyCode, scanCode)) {
