@@ -13,17 +13,13 @@ import info.u_team.music_player.musicplayer.playlist.Playlist;
 import info.u_team.music_player.musicplayer.playlist.Skip;
 import info.u_team.music_player.musicplayer.settings.Repeat;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class MusicPlayerNetworkHandler {
@@ -34,26 +30,7 @@ public class MusicPlayerNetworkHandler {
 
     private static Playlist MULTI_PLAYLIST;
 
-    private static boolean isPlaying = false;
-    private static String previousTrack = "";
-
     public static void register() {
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode()) {
-                boolean current = MusicPlayerManager.getPlayer().getTrackManager().getCurrentTrack() != null;
-
-                if (client.getConnection() != null && isPlaying && !current) {
-                    Map<String, String> packetData = new HashMap<>();
-                    packetData.put("playInfo", "STOP");
-                    packetData.put("endTrack", previousTrack);
-                    byte[] byteData = GSON_NON_PRETTY.toJson(packetData).getBytes(StandardCharsets.UTF_8);
-                    ClientPlayNetworking.send(CHANNEL, new FriendlyByteBuf(Unpooled.copiedBuffer(byteData)));
-                }
-                isPlaying = current;
-                //previousTrack = isPlaying ? previousTrack : "";
-            }
-        });
-
         ClientPlayNetworking.registerGlobalReceiver(CHANNEL, (client, handler, buf, responseSender) -> {
             if (!MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode()) return;
 
@@ -65,21 +42,7 @@ public class MusicPlayerNetworkHandler {
             //final ITrackManager manager = MusicPlayerManager.getPlayer().getTrackManager();
 
             switch (packetData.getOrDefault("playStatus", "NONE")) {
-                case "PLAY" -> {
-                    if (previousTrack.equalsIgnoreCase(packetData.get("timeStamp"))) {
-                        if (!isPlaying){
-                            client.execute(() -> {
-                                Map<String, String> sendData = new HashMap<>();
-                                sendData.put("playInfo", "STOP");
-                                sendData.put("endTrack", previousTrack);
-                                byte[] byteData = GSON_NON_PRETTY.toJson(sendData).getBytes(StandardCharsets.UTF_8);
-                                ClientPlayNetworking.send(CHANNEL, new FriendlyByteBuf(Unpooled.copiedBuffer(byteData)));
-                            });
-                        }
-                        return;
-                    }
-                    playTrack(client, packetData.getOrDefault("URL", "null"));
-                }
+                case "PLAY" -> playTrack(client, packetData.getOrDefault("URL", "null"));
                 case "STOP" -> stopMultiTrack();
                 default -> MusicPlayerMod.LOGGER.warn("Unknown Packet");
             }
@@ -88,15 +51,6 @@ public class MusicPlayerNetworkHandler {
                 MusicPlayerManager.getSettingsManager().getSettings().setRepeat(Repeat.SINGLE);
             else
                 MusicPlayerManager.getSettingsManager().getSettings().setRepeat(Repeat.NO);
-
-            if (packetData.containsKey("timeStamp"))
-                previousTrack = packetData.getOrDefault("timeStamp", "");
-
-			/*client.execute(() -> {
-				Player player = client.player;
-				for (String string : strings)
-					player.sendMessage(new TextComponent(string), player.getUUID());
-			});*/
         });
     }
 
@@ -153,8 +107,6 @@ public class MusicPlayerNetworkHandler {
     public static void stopMultiTrack() {
         if (MULTI_PLAYLIST != null)
             MULTI_PLAYLIST.setStopable();
-        isPlaying = false;
-        previousTrack = "";
         MusicPlayerManager.getPlayer().getTrackManager().stop();
     }
 
