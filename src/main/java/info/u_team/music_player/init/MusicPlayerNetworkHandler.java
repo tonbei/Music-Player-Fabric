@@ -13,6 +13,7 @@ import info.u_team.music_player.musicplayer.playlist.Playlist;
 import info.u_team.music_player.musicplayer.playlist.Skip;
 import info.u_team.music_player.musicplayer.settings.Repeat;
 import io.netty.buffer.ByteBufUtil;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -31,6 +32,12 @@ public class MusicPlayerNetworkHandler {
     private static Playlist MULTI_PLAYLIST;
 
     public static void register() {
+        ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
+            if (!MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode()) return;
+
+            stopMultiTrack();
+        }));
+
         ClientPlayNetworking.registerGlobalReceiver(CHANNEL, (client, handler, buf, responseSender) -> {
             if (!MusicPlayerManager.getSettingsManager().getSettings().isMultiplayerMode()) return;
 

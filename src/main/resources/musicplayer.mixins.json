@@ -6,7 +6,8 @@
 	"mixins": [],
 	"client": [
 		"KeyboardHandlerMixin",
-		"GuiMixin"
+		"GuiMixin",
+		"ClientLevelMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
